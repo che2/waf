@@ -45,6 +45,7 @@ class ConfigurationContext(Context.Context):
 	def __init__(self, **kw):
 		super(ConfigurationContext, self).__init__(**kw)
 		self.environ = dict(os.environ)
+		self.added_os_flags = []  # flags already added from self.environ
 		self.all_envs = {}
 
 		self.top_dir = None
@@ -364,8 +365,12 @@ def add_os_flags(self, var, dest=None):
 	:param dest: destination variable, by default the same as var
 	:type dest: string
 	"""
+	if var in self.added_os_flags:
+		return
 	# do not use 'get' to make certain the variable is not defined
-	try: self.env.append_value(dest or var, shlex.split(self.environ[var]))
+	try:
+		self.env.append_value(dest or var, shlex.split(self.environ[var]))
+		self.added_os_flags.append(var)
 	except KeyError: pass
 
 @conf
@@ -660,6 +665,3 @@ def test(self, *k, **kw):
 	else:
 		self.end_msg(self.ret_msg(kw['okmsg'], kw), **kw)
 	return ret
-
-
-
